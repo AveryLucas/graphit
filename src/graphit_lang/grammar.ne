@@ -1,8 +1,12 @@
-possible_component_syntax_examples
-	->	component_resource_link
+syntax
+	->	possible_syntax {% id %}
+	|	possible_syntax "\n" syntax {% d => [...d[0], ...d[2]] %}
+
+possible_syntax
+	-> component_resource_link
 
 component_resource_link
-	->	_ component_layout _ resource_link _ component_layout
+	->	_ component_layout _ resource_link _ component_layout ";"
 		{% d => ({syntax: 'link', from: d[1], to: d[5]}) %}
 	|	_ component_layout _ resource_link component_resource_link 
 		{% d => ({syntax: 'link', from: d[1], to: d[4]}) %}
@@ -16,13 +20,6 @@ component_layout
 		{% d => ({syntax: 'component', type: d[0], functions: d[2], label: ''}) %}
 	|	component_keywords ":" function_stack_possible ":" string
 		{% d => ({syntax: 'component', type: d[0], functions: d[2], label: d[4]}) %}
-
-value
-	->	string		{% id %}
-	|	number		{% id %}
-	|	percentage	{% id %}
-	|	myNull		{% id %}
-	|	boolean		{% id %}
 	
 function_stack_possible
 	->	function	{% d => [d[0]] %}
@@ -54,6 +51,13 @@ example_functions
 resource_link -> "->"	{% id %}
 
 # Defining different types of values ie: numbers, strings, whitespace
+
+value
+	->	string		{% id %}
+	|	number		{% id %}
+	|	percentage	{% id %}
+	|	myNull		{% id %}
+	|	boolean		{% id %}
 
 string -> "\"" characters "\"" {% d => d[1] %}
 
