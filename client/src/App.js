@@ -1,9 +1,11 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import Logic from "./graphit_lang/Logic";
 
 function App() {
   return (
     <div className="App">
+      <Logic />
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>

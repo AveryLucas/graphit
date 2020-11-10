@@ -1,0 +1,85 @@
+// Generated automatically by nearley, version 2.19.7
+// http://github.com/Hardmath123/nearley
+(function () {
+function id(x) { return x[0]; }
+var grammar = {
+    Lexer: undefined,
+    ParserRules: [
+    {"name": "syntax", "symbols": ["possible_syntax"], "postprocess": id},
+    {"name": "syntax", "symbols": ["possible_syntax", "__", "syntax"], "postprocess": d => [...d[0], ...d[2]]},
+    {"name": "possible_syntax", "symbols": ["component_resource_link"]},
+    {"name": "component_resource_link", "symbols": ["_", "component_layout", "_", "resource_link", "_", "component_layout", {"literal":";"}], "postprocess": d => ({...d[3], ...{from: d[1], to: d[5]}})},
+    {"name": "component_resource_link", "symbols": ["_", "component_layout", "_", "resource_link", "component_resource_link"], "postprocess": d => ({...d[3], ...{from: d[1], to: d[4]}})},
+    {"name": "component_layout", "symbols": ["component_keywords"], "postprocess": d => ({syntax: 'comp', type: d[0], functions: [], label: ''})},
+    {"name": "component_layout", "symbols": ["component_keywords", {"literal":":"}, "string"], "postprocess": d => ({syntax: 'comp', type: d[0], functions: [], label: d[2]})},
+    {"name": "component_layout", "symbols": ["component_keywords", {"literal":":"}, "function_stack_possible"], "postprocess": d => ({syntax: 'comp', type: d[0], functions: d[2], label: ''})},
+    {"name": "component_layout", "symbols": ["component_keywords", {"literal":":"}, "function_stack_possible", {"literal":":"}, "string"], "postprocess": d => ({syntax: 'comp', type: d[0], functions: d[2], label: d[4]})},
+    {"name": "function_stack_possible", "symbols": ["function"], "postprocess": d => [d[0]]},
+    {"name": "function_stack_possible", "symbols": ["function", {"literal":":"}, "function_stack_possible"], "postprocess": d => ([d[0], ...d[2]])},
+    {"name": "function", "symbols": ["example_functions", "parenthesis_arguments"], "postprocess": d => ({type: d[0], arguments: d[1], syntax: 'function'})},
+    {"name": "arguments", "symbols": ["value"], "postprocess": (d) => [d[0]]},
+    {"name": "arguments", "symbols": ["value", "_", {"literal":","}, "_", "arguments"], "postprocess": d => [d[0], ...d[4]]},
+    {"name": "parenthesis_arguments", "symbols": [{"literal":"("}, "_", "arguments", "_", {"literal":")"}], "postprocess": d => d[2]},
+    {"name": "parenthesis_arguments$string$1", "symbols": [{"literal":"("}, {"literal":")"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "parenthesis_arguments", "symbols": ["parenthesis_arguments$string$1"]},
+    {"name": "square_bracket_arguments", "symbols": [{"literal":"["}, "_", "arguments", "_", {"literal":"]"}], "postprocess": d => d[2]},
+    {"name": "square_bracket_arguments$string$1", "symbols": [{"literal":"["}, {"literal":"]"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "square_bracket_arguments", "symbols": ["square_bracket_arguments$string$1"]},
+    {"name": "component", "symbols": ["component_keywords"], "postprocess": id},
+    {"name": "component", "symbols": ["component_keywords", {"literal":":"}, "string"], "postprocess": d => ({a: 3})},
+    {"name": "component_keywords$string$1", "symbols": [{"literal":"S"}, {"literal":"o"}, {"literal":"u"}, {"literal":"r"}, {"literal":"c"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "component_keywords", "symbols": ["component_keywords$string$1"], "postprocess": id},
+    {"name": "component_keywords$string$2", "symbols": [{"literal":"G"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "component_keywords", "symbols": ["component_keywords$string$2"], "postprocess": id},
+    {"name": "component_keywords$string$3", "symbols": [{"literal":"B"}, {"literal":"a"}, {"literal":"n"}, {"literal":"k"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "component_keywords", "symbols": ["component_keywords$string$3"], "postprocess": id},
+    {"name": "example_functions$string$1", "symbols": [{"literal":"r"}, {"literal":"a"}, {"literal":"n"}, {"literal":"d"}, {"literal":"o"}, {"literal":"m"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "example_functions", "symbols": ["example_functions$string$1"], "postprocess": id},
+    {"name": "example_functions$string$2", "symbols": [{"literal":"e"}, {"literal":"x"}, {"literal":"c"}, {"literal":"h"}, {"literal":"a"}, {"literal":"n"}, {"literal":"g"}, {"literal":"e"}, {"literal":"_"}, {"literal":"a"}, {"literal":"l"}, {"literal":"l"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "example_functions", "symbols": ["example_functions$string$2"], "postprocess": id},
+    {"name": "resource_link", "symbols": ["basic_link"], "postprocess": id},
+    {"name": "resource_link", "symbols": ["multi_link"], "postprocess": id},
+    {"name": "basic_link$string$1", "symbols": [{"literal":"-"}, {"literal":">"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "basic_link", "symbols": ["basic_link$string$1"], "postprocess": d => ({syntax: "link", type: "basic"})},
+    {"name": "basic_link$string$2", "symbols": [{"literal":"-"}, {"literal":">"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "basic_link", "symbols": ["basic_link$string$2", "_", "parenthesis_arguments"], "postprocess": d => ({syntax: "link", type: "basic_random", arguments: d[2]})},
+    {"name": "basic_link$string$3", "symbols": [{"literal":"-"}, {"literal":">"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "basic_link", "symbols": ["basic_link$string$3", "_", "square_bracket_arguments"], "postprocess": d => ({syntax: "link", type: "basic_exchange", arguments: d[2]})},
+    {"name": "multi_link$string$1", "symbols": [{"literal":"|"}, {"literal":"-"}, {"literal":">"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "multi_link", "symbols": ["multi_link$string$1"], "postprocess": d => ({syntax: "link", type: "multiple"})},
+    {"name": "multi_link$string$2", "symbols": [{"literal":"|"}, {"literal":"-"}, {"literal":">"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "multi_link", "symbols": ["multi_link$string$2", "_", "parenthesis_arguments"], "postprocess": d => ({syntax: "link", type: "multiple_random", arguments: d[1]})},
+    {"name": "value", "symbols": ["string"], "postprocess": id},
+    {"name": "value", "symbols": ["number"], "postprocess": id},
+    {"name": "value", "symbols": ["percentage"], "postprocess": id},
+    {"name": "value", "symbols": ["myNull"], "postprocess": id},
+    {"name": "value", "symbols": ["boolean"], "postprocess": id},
+    {"name": "string", "symbols": [{"literal":"\""}, "characters", {"literal":"\""}], "postprocess": d => d[1]},
+    {"name": "characters$ebnf$1", "symbols": [/[^"]/]},
+    {"name": "characters$ebnf$1", "symbols": ["characters$ebnf$1", /[^"]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "characters", "symbols": ["characters$ebnf$1"], "postprocess": d => d[0].join('')},
+    {"name": "percentage", "symbols": ["number", {"literal":"%"}], "postprocess": d => d[0] / 100},
+    {"name": "number", "symbols": ["digits", {"literal":"."}, "digits"], "postprocess": d => Number(d[0] + "." + d[2])},
+    {"name": "number", "symbols": ["digits"], "postprocess": d => Number(d)},
+    {"name": "digits", "symbols": ["digit"], "postprocess": id},
+    {"name": "digits", "symbols": ["digit", "digits"], "postprocess": d => d.join("")},
+    {"name": "digit", "symbols": [/[0-9]/], "postprocess": id},
+    {"name": "boolean$string$1", "symbols": [{"literal":"t"}, {"literal":"r"}, {"literal":"u"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "boolean", "symbols": ["boolean$string$1"], "postprocess": () => true},
+    {"name": "boolean$string$2", "symbols": [{"literal":"f"}, {"literal":"a"}, {"literal":"l"}, {"literal":"s"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "boolean", "symbols": ["boolean$string$2"], "postprocess": () => false},
+    {"name": "myNull$string$1", "symbols": [{"literal":"n"}, {"literal":"u"}, {"literal":"l"}, {"literal":"l"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "myNull", "symbols": ["myNull$string$1"], "postprocess": () => null},
+    {"name": "__", "symbols": [/[ \n\t]/], "postprocess": () => ' '},
+    {"name": "_$ebnf$1", "symbols": []},
+    {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", /[ \t\n]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "_", "symbols": ["_$ebnf$1"], "postprocess": () => ' '}
+]
+  , ParserStart: "syntax"
+}
+if (typeof module !== 'undefined'&& typeof module.exports !== 'undefined') {
+   module.exports = grammar;
+} else {
+   window.grammar = grammar;
+}
+})();

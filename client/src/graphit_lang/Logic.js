@@ -4,16 +4,14 @@ import React from "react";
 let temp_data = {
   links: {
     1: {
-      type: "BASIC", // basic,
+      type: "FAIL_FORWARD", // basic,
       from: ["LGQZI6"],
       to: ["RGPT60"],
+      conditionals: {
+        RGPT60: [{ type: "Chance", val: 0.2 }],
+      },
       var: {
-        // sentLast: "",
         index: 0,
-        split: true,
-        splitAll: false,
-        indexed: false,
-        passItForward: false,
         resources: 0,
       },
     },
@@ -22,6 +20,8 @@ let temp_data = {
     LGQZI6: {
       label: "Win Match",
       id: "LGQZI6",
+      resourceType: "",
+      order: 1,
       var: {
         output: 1,
         generates: 1,
@@ -34,6 +34,8 @@ let temp_data = {
     RGPT60: {
       label: "Matches Won",
       id: "RGPT60",
+      resourceType: "",
+      order: 1,
       var: {
         output: 1,
         allowNegative: false,
@@ -71,39 +73,33 @@ class Logic extends React.Component {
 
   linkTickLogic(link_id) {
     // console.log(link);
-    const link = this.temp_data.links[link_id];
-    const components = this.temp_data.components;
+    let link = this.temp_data.links[link_id];
     // let instructions = { sendTo: [], sendFrom: [], linkSuccess: true };
 
     if (!link) return { linkSuccess: false };
 
-    let resourcesToSend = (deduct = true) => {
-      let num = 0;
-      for (var i = 0; i < link.from.length; i++) {
-        let comp = components[link.from[i]];
-        num += comp.var.output;
-        if (deduct) this.sendResoucesTo(comp.id, -comp.var.output);
-      }
-      return num;
-    };
-
     switch (link.type) {
       case "BASIC":
         // Verify conditions met for link to component transfer.
-        // No conditions yet though so just send it.
-        this.sendResoucesTo(link.to[link.var.index], resourcesToSend());
-        // Add 1 to index if there is an index after our current location. Otherwise reset to 0 for next tick.
-        link.var.index =
-          link.var.index + 1 > link.to.length - 1 ? 0 : link.var.index + 1;
+        if (this.checkLinkConditionals(link, link.to[link.var.index]).success) {
+          this.sendResoucesTo(
+            link.to[link.var.index],
+            this.getResourcesToSend(link)
+          );
+          // Add 1 to index if there is an index after our current location. Otherwise reset to 0 for next tick.
+          link.var.index =
+            link.var.index + 1 > link.to.length - 1 ? 0 : link.var.index + 1;
+        }
         break;
       case "FAIL_FORWARD":
+        this.failForwardRecursive(link);
         break;
       case "SPLIT_SHARE":
       case "SPLIT_MULT":
         // If type is SPLIT_SHARE, divide ammount by number of receivers.. Otherwise divide by 1.
         // Share (*), Mult (**) in syntax
         let ammount =
-          resourcesToSend() /
+          this.getResourcesToSend(link) /
           (link.type.split("_")[1] == "SHARE" ? link.to.length : 1);
         for (var i = 0; i < link.to.length; i++) {
           // Verify conditions met for link to component transfer per component.
@@ -115,6 +111,63 @@ class Logic extends React.Component {
         console.error(`ERROR: ${link.id} does not have a valid type!`);
         break;
     }
+  }
+
+  checkLinkConditionals(link, comp_id) {
+    let comp = this.temp_data.components[comp_id];
+    if (link.conditionals[comp.id]) {
+      for (var i = 0; i < link.conditionals[comp.id].length; i++) {
+        let condition = link.conditionals[comp.id][i];
+        switch (condition.type) {
+          case "Chance":
+            let generated = Math.random();
+            // console.log(generated);
+            return { success: generated < condition.val };
+          default:
+            console.error(
+              `ERROR: ${link.id} has invalid condition for ${comp.id} (${condition.type})!`
+            );
+            return { success: false };
+        }
+      }
+    }
+  }
+
+  failForwardRecursive(link) {
+    let starting = link.var.index;
+    let index = starting;
+    let firstPass = false;
+    let check = this.checkLinkConditionals(link, link.to[index]);
+    if (check.success) {
+      this.sendResoucesTo(link.to[index], this.getResourcesToSend(link));
+      link.var.index = 0;
+    } else {
+      if (!firstPass) {
+        firstPass = true;
+      } else {
+        if (link.to.length > index - 1) {
+          index += 1;
+        } else {
+          index = 0;
+        }
+        if (index == starting) {
+          return -1;
+        } else {
+          this.failForwardRecursive();
+        }
+      }
+    }
+  }
+
+  getResourcesToSend(link, deduct = true) {
+    const components = this.temp_data.components;
+    let num = 0;
+    for (var i = 0; i < link.from.length; i++) {
+      let comp = components[link.from[i]];
+      num += comp.var.output;
+      if (deduct) this.sendResoucesTo(comp.id, -comp.var.output);
+    }
+    return num;
   }
 
   sendResoucesTo(target, ammount = 1) {

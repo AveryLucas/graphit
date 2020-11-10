@@ -1,0 +1,186 @@
+Gate
+  ->  Bank
+  ->  Bank
+  ->  Bank
+
+| Bank
+| Bank
+  -> Gate:exchange(1, 3) -> Bank
+
+Source
+  -> Gate:random(50, 10)
+  -> Bank
+  -> Gate:exchange_all(3, 1);
+
+
+Source
+	-> Gate:random(50, 10)
+	-> Bank
+	-> Gate:exchange_all(3, 1);
+
+Source
+	-> Gate:random(50, 10)
+	-> Bank
+	-> Gate:exchange_all(3, 1);
+
+Source	->	Bank;
+
+Source
+|<-	Bank
+|<- Bank
+|<-	Bank
+	-> Gate:random(2%):"Doop!";
+
+Source
+| Gate:random(2%):"Doop!"
+| Gate:random(2%):"Doop!"
+|	Gate:random(2%):"Doop!"
+	-> Gate:random(2%):"Doop!";
+
+# Source linked to all 3 banks.
+Source
+|->	Bank
+|->	Bank
+|->	Bank
+
+# Source linked to all 3 banks but picks 1 at random to go into
+
+Source
+|-> (10%)		Bank:"Rare" ->(10%) Bank:"Legendary"
+|-> (30%)		Bank:"Uncommon"
+|-> (60%)		Bank:"Common"
+
+4 players all playing with loot share.
+Whoever gets the kill gets the loot.
+Whoever has the most loot has a higher chance of getting the kill.
+
+Source:"Kill Enemy"
+|-> (1)	Bank:"Player 1"
+|-> (1)	Bank:"Player 2"
+|-> (1)	Bank:"Player 3"EE
+
+# Source sends to multiple bank, each bank has their own resource path afterwards?
+Source
+|-> Bank ->(10%) Bank
+|-> Bank ->(10%) Bank
+
+
+###############################################################
+
+# Link types
+# Basic
+# 	Source -> Bank
+
+# Random chance
+# 	Source ->(20%) Bank
+
+# Exchange
+# 	Source ->[3, 1] Bank
+
+# Link to multiple. Source sends 1 resource to all 3 banks..
+# 	Source |-> Bank |-> Bank |-> Bank
+
+# Link to multiple. Only send to 1 of them. Choose 1 is random. Can use percentages or weighted numbers
+#		Source |->(10%) Bank |->(10%) Bank |->(10%) Bank
+#		Source |->(1) Bank |->(1) Bank |->(10) Bank
+
+# Multiple Linked to 1 component (WIP)
+#		Bank ==> Bank ==> Bank ==>[3, 1] Bank
+
+# 3 Key fragments, 1 Chest Exhcange
+# Multiple Basic Exchange
+
+###############################################################
+
+# Basic Conditional, C to C
+Source  ->(30%, to<10, 3in1out) Bank
+
+# Basic Multiple Conditional. C to C:+
+Source
+  |->(30%, to<10, 3in1out) Bank
+  |->(30%, to<10, 3in1out) Bank
+  |->(40%, to<10, 3in1out) Bank
+
+# Basic Multiple Conditional. C to C:+
+Source
+  |->(30%, to<10, 3in1out) Bank
+  |->(30%, to<10, 3in1out) Bank
+  |->(40%, to<10, 3in1out) Bank
+
+# Link Indexed
+
+Source
+  >to(chance30, to<10)   Bank
+  and(chance30, to<10)  Bank
+  and(chance30, to<10)  Bank
+
+Source # Double bracket applies to all maybe?
+  to  ((chance30))  Bank
+  and Bank 
+  and Bank 
+
+rules: 2in1out, chance30, to<10
+
+
+###############################################################
+
+# Sync Link Slit (Divides output)
+Source
+  *to   Bank
+  and   Bank
+  and   Bank
+
+# Sync Split All (Dont divide output)
+Source
+  **to  Bank
+  and   Bank -> Source -> Bank
+  and   Bank
+
+# Indexed (Sends output to each component one at a time. Comp is indexed every tick.)
+Source
+  to    Bank
+  and   Bank
+  and   Bank
+
+# Keys and Chests
+@key_fragments is Container(output3, isSource) of #key_fragments
+@keys is Container of #keys
+@chests is Container of #chests
+
+@key_fragments and @chests to @Cosmetics
+
+#Matches to keys
+@win_match is Source of #matches_won
+@match_counter is Bank of #matches_won
+
+@win_match **to(chance10) @key_fragments and @match_counter
+
+@key_fragments and @chests to @Cosmetics
+from: [Key, Chest]
+to: [Cosmetics]
+rules: 2in1out
+
+###############################################################
+
+# Divides output across all targets. ie: 5 targets. 5 resources. 1 each.
+*to
+
+# Does not divide output. ie: 5 targets. 5 resources. 5 each.
+**to
+
+# Indexed. ie: 5 targets, resources. 1 gets 5 this tick, the next one gets 5, etc. Index does not reset on fail.
+to
+
+# Fail forward. Indexed but if conditions arnt met, try to send to next one that tick. Resets index on success.
+>to
+
+# Fail forward. Indexed but if conditions arnt met, try the next one until loop is made. Does not reset on success.
+>>to
+
+# Srict. Indexed but if conditions arnt met, immediate reset to starting index.
+!to
+
+# Types of Links
+# ->  BASIC, SPLIT_SHARE (*), SPLIT_MULT (**), FAIL_FORWARD (>)
+
+###############################################################
