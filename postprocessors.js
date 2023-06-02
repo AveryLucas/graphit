@@ -1,4 +1,6 @@
-exports.location_method_chain = ([locationChain, , methodChain]) => ({
+const { v4: uuidv4 } = require("uuid");
+
+exports.location_method_chain = ([locationChain, , , , methodChain]) => ({
   type: "location_method_chain",
   locationChain,
   methodChain,
@@ -6,12 +8,12 @@ exports.location_method_chain = ([locationChain, , methodChain]) => ({
 
 exports.method_invocation_no_args = ([identifier]) => ({
   type: "method_invocation",
-  name: identifier[0],
+  name: identifier,
 });
 
 exports.method_invocation_with_args = ([identifier, , , , args]) => ({
   type: "method_invocation",
-  name: identifier[0],
+  name: identifier,
   args,
 });
 
@@ -45,61 +47,41 @@ exports.root_location_declaration_single = ([, , identifier]) => ({
   name: identifier,
 });
 
-exports.root_location_declaration_with_children = ([
-  ,
-  ,
-  identifier,
-  ,
-  ,
-  locationDeclaration,
-]) => ({
-  type: "root_location_declaration",
-  name: identifier,
-  children: locationDeclaration,
-});
+exports.root_location_declaration_with_children = ([, , name, , , , child]) => {
+  const id = uuidv4();
 
-exports.hierarchical_location_declaration_cluster = (id) => ({
-  type: "hierarchical_location_declaration",
-  locationCluster: id,
-});
-
-exports.hierarchical_location_declaration_cluster_and_location = ([
-  locationCluster,
-  ,
-  locationDeclaration,
-]) => ({
-  type: "hierarchical_location_declaration",
-  locationCluster,
-  locationDeclaration,
-});
+  return {
+    id,
+    type: "location_declaration",
+    name,
+    children: child,
+  };
+};
 
 exports.hierarchical_location_declaration_single = ([identifier]) => ({
-  type: "location",
-  name: identifier[0],
+  type: "location_declaration",
+  id: uuidv4(),
+  name: identifier,
 });
 
 exports.hierarchical_location_declaration_with_children = ([
   identifier,
   ,
   ,
-  locationDeclaration,
-]) => ({
-  type: "hierarchical_location_declaration",
-  name: identifier[0],
-  children: locationDeclaration,
-});
+  ,
+  children,
+]) => {
+  const id = uuidv4();
 
-exports.location_cluster = ([, , elements]) => ({
-  type: "location_cluster",
-  elements,
-});
+  if (!Array.isArray(children)) children = [children];
 
-exports.cluster_elements_single = ([identifier]) => [identifier[0]];
-
-exports.cluster_elements_multiple = ([identifier, , elements]) => [
-  identifier[0],
-  ...elements,
-];
+  return {
+    id,
+    type: "location_declaration",
+    name: identifier,
+    children: children.map((child) => ({ ...child, parent: id })),
+  };
+};
 
 exports.identifier = ([firstLetter, rest]) =>
   firstLetter + (rest ? rest.join("") : "");
